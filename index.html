@@ -28,40 +28,51 @@
   }
   </script>
   <script type="module">
-    import { Game } from './src/core/game.js';
+    console.log('Module script starting...');
+    
+    try {
+      const { Game } = await import('./src/core/game.js');
+      console.log('Game module loaded successfully');
+      
+      const loading = document.getElementById('loading');
+      console.log('Loading element found:', !!loading);
+      
+      const canvas = document.createElement('canvas');
+      document.body.appendChild(canvas);
+      console.log('Canvas created and appended');
 
-    const loading = document.getElementById('loading');
-    console.log('DOM loaded, starting game initialization');
+      const game = new Game(canvas);
+      console.log('Game instance created');
 
-    const canvas = document.createElement('canvas');
-    document.body.appendChild(canvas);
+      // Click to begin - required for AudioContext
+      function startGame() {
+        console.log('User interaction detected, starting game...');
+        document.removeEventListener('click', startGame);
+        document.removeEventListener('keydown', startGame);
+        if (loading) loading.textContent = 'Initializing…';
+        game.init().then(() => {
+          console.log('Game init succeeded');
+          if (loading) loading.remove();
+          console.log('Gloomward ready');
+        }).catch(e => {
+          console.error('Game init failed:', e);
+          if (loading) loading.textContent = 'Failed to load: ' + e.message;
+          console.error(e);
+        });
+      }
 
-    const game = new Game(canvas);
-    console.log('Game instance created');
+      document.addEventListener('click', startGame, { once: true });
+      document.addEventListener('keydown', startGame, { once: true });
+      console.log('Event listeners added, waiting for user interaction...');
 
-    // Click to begin - required for AudioContext
-    function startGame() {
-      console.log('User interaction detected, starting game...');
-      document.removeEventListener('click', startGame);
-      document.removeEventListener('keydown', startGame);
-      loading.textContent = 'Initializing…';
-      game.init().then(() => {
-        console.log('Game init succeeded');
-        loading.remove();
-        console.log('Gloomward ready');
-      }).catch(e => {
-        console.error('Game init failed:', e);
-        loading.textContent = 'Failed to load: ' + e.message;
-        console.error(e);
-      });
+      // Expose for debugging
+      window.game = game;
+      console.log('Setup complete, waiting for click...');
+    } catch (e) {
+      console.error('Module load error:', e);
+      const loading = document.getElementById('loading');
+      if (loading) loading.textContent = 'Module load error: ' + e.message;
     }
-
-    document.addEventListener('click', startGame, { once: true });
-    document.addEventListener('keydown', startGame, { once: true });
-    console.log('Event listeners added, waiting for user interaction...');
-
-    // Expose for debugging
-    window.game = game;
   </script>
 </body>
 </html>
