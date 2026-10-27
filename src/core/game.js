@@ -6,6 +6,7 @@ import { Renderer } from '../render/renderer.js';
 import { SceneManager } from '../render/scene.js';
 import { CameraController, CinematicShots } from '../render/camera.js';
 import { PlayerRenderer } from '../render/player.js';
+import { AssetViewer } from '../render/viewer.js';
 import { AudioEngine } from '../audio/context.js';
 import { AmbienceSystem } from '../audio/ambience.js';
 import { MusicSystem, MusicState } from '../audio/music.js';
@@ -81,6 +82,10 @@ export class Game {
     this.debug = false;
     this.debugInfo = {};
 
+    // Viewer mode
+    this.viewer = null;
+    this.viewerMode = false;
+
     // Auto-save
     this.autoSaveTimer = 0;
     this.autoSaveInterval = 30; // seconds
@@ -88,6 +93,12 @@ export class Game {
 
   async init() {
     console.log('Initializing Gloomward...');
+
+    // Check URL parameters
+    const params = new URLSearchParams(window.location.search);
+    this.viewerMode = params.get('viewer') === '1';
+    this.debug = params.get('debug') === '1';
+    this.selftestMode = params.get('selftest') === '1';
 
     // Initialize renderer
     this.renderer = new Renderer(this.canvas);
@@ -121,6 +132,9 @@ export class Game {
     this.optionsManager = new OptionsManager();
     this.menuSystem = new MenuSystem(this.inputManager, this);
     this.hintSystem = new HintSystem();
+
+    // Initialize viewer
+    this.viewer = new AssetViewer(this.renderer, this.sceneManager, this.camera);
 
     // Initialize simulation systems
     this.combatSystem = new CombatSystem(new SeededRNG(0));
@@ -171,6 +185,11 @@ export class Game {
   }
 
   showTitleScreen() {
+    if (this.viewerMode) {
+      this.viewer.enable();
+      this.hintSystem.hide();
+      return;
+    }
     this.menuSystem.show('title');
     this.hintSystem.setHints(HintSystem.getContextHints('title'));
     this.ambienceSystem.setTheme('streets');
@@ -435,6 +454,15 @@ export class Game {
   }
 
   animate(time = 0) {
+    if (this.viewerMode) {
+      const dt = Math.min((time - this.lastTime) / 1000, 0.1);
+      this.lastTime = time;
+      this.viewer.update(dt, this.getInputState());
+      this.audioEngine.update(dt);
+      requestAnimationFrame((t) => this.animate(t));
+      return;
+    }
+
     if (this.state !== 'playing') {
       requestAnimationFrame((t) => this.animate(t));
       return;
@@ -1244,6 +1272,9 @@ export class Game {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.resize(window.innerWidth, window.innerHeight);
+    if (this.viewer) {
+      this.viewer.handleResize();
+    }
   }
 
   onError(error) {
@@ -1360,5 +1391,8 @@ export class Game {
     this.audioEngine.dispose();
     this.menuSystem.dispose();
     this.hintSystem.dispose();
+    if (this.viewer) {
+      this.viewer.disable();
+    }
   }
 }

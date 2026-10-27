@@ -1,0 +1,350 @@
+{
+  "textures": [
+    {
+      "name": "concrete",
+      "path": "textures/concrete.png",
+      "size": 6800,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "brick",
+      "path": "textures/brick.png",
+      "size": 6387,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "plaster",
+      "path": "textures/plaster.png",
+      "size": 7153,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "wallpaper_floral",
+      "path": "textures/wallpaper_floral.png",
+      "size": 5446,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "wallpaper_striped",
+      "path": "textures/wallpaper_striped.png",
+      "size": 7590,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "wallpaper_damask",
+      "path": "textures/wallpaper_damask.png",
+      "size": 6395,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "hospital_tile",
+      "path": "textures/hospital_tile.png",
+      "size": 5437,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "wood_planks",
+      "path": "textures/wood_planks.png",
+      "size": 9740,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "linoleum",
+      "path": "textures/linoleum.png",
+      "size": 8633,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "carpet",
+      "path": "textures/carpet.png",
+      "size": 6206,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "asphalt",
+      "path": "textures/asphalt.png",
+      "size": 3345,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "paving",
+      "path": "textures/paving.png",
+      "size": 6745,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "grass_dirt",
+      "path": "textures/grass_dirt.png",
+      "size": 4156,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "metal_corrugated",
+      "path": "textures/metal_corrugated.png",
+      "size": 6675,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "metal_rusted",
+      "path": "textures/metal_rusted.png",
+      "size": 9346,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "metal_pipes",
+      "path": "textures/metal_pipes.png",
+      "size": 4209,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "grating",
+      "path": "textures/grating.png",
+      "size": 4237,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "nightmare_wall",
+      "path": "textures/nightmare_wall.png",
+      "size": 6177,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "nightmare_floor_grating",
+      "path": "textures/nightmare_floor_grating.png",
+      "size": 5119,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "nightmare_floor_blood",
+      "path": "textures/nightmare_floor_blood.png",
+      "size": 4110,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "nightmare_flesh",
+      "path": "textures/nightmare_flesh.png",
+      "size": 5276,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "nightmare_veins",
+      "path": "textures/nightmare_veins.png",
+      "size": 4188,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "nightmare_static",
+      "path": "textures/nightmare_static.png",
+      "size": 2964,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "blood_pool",
+      "path": "textures/blood_pool.png",
+      "size": 1925,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "blood_splatter",
+      "path": "textures/blood_splatter.png",
+      "size": 1617,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "stain_water",
+      "path": "textures/stain_water.png",
+      "size": 2233,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "stain_oil",
+      "path": "textures/stain_oil.png",
+      "size": 1712,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "stain_mould",
+      "path": "textures/stain_mould.png",
+      "size": 1561,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "crack_floor",
+      "path": "textures/crack_floor.png",
+      "size": 565,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "crack_wall",
+      "path": "textures/crack_wall.png",
+      "size": 565,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "scratch_light",
+      "path": "textures/scratch_light.png",
+      "size": 1402,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "scratch_deep",
+      "path": "textures/scratch_deep.png",
+      "size": 565,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "footprint_human",
+      "path": "textures/footprint_human.png",
+      "size": 2067,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "symbol_circle",
+      "path": "textures/symbol_circle.png",
+      "size": 1741,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "fog_puff",
+      "path": "textures/fog_puff.png",
+      "size": 137,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "dust_mote",
+      "path": "textures/dust_mote.png",
+      "size": 137,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "drip",
+      "path": "textures/drip.png",
+      "size": 136,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "spark",
+      "path": "textures/spark.png",
+      "size": 137,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    },
+    {
+      "name": "moth",
+      "path": "textures/moth.png",
+      "size": 135,
+      "generator": "tools/gen_textures.py",
+      "license": "CC0"
+    }
+  ],
+  "audio": [
+    {
+      "name": "ambience_streets",
+      "path": "audio/ambience_streets.wav",
+      "size": 882044,
+      "generator": "tools/gen_audio.py",
+      "license": "CC0"
+    },
+    {
+      "name": "ambience_apartments",
+      "path": "audio/ambience_apartments.wav",
+      "size": 882044,
+      "generator": "tools/gen_audio.py",
+      "license": "CC0"
+    },
+    {
+      "name": "ambience_clinic",
+      "path": "audio/ambience_clinic.wav",
+      "size": 882044,
+      "generator": "tools/gen_audio.py",
+      "license": "CC0"
+    },
+    {
+      "name": "ambience_offices",
+      "path": "audio/ambience_offices.wav",
+      "size": 882044,
+      "generator": "tools/gen_audio.py",
+      "license": "CC0"
+    },
+    {
+      "name": "ambience_industrial",
+      "path": "audio/ambience_industrial.wav",
+      "size": 882044,
+      "generator": "tools/gen_audio.py",
+      "license": "CC0"
+    },
+    {
+      "name": "ambience_nightmare",
+      "path": "audio/ambience_nightmare.wav",
+      "size": 882044,
+      "generator": "tools/gen_audio.py",
+      "license": "CC0"
+    },
+    {
+      "name": "ambience_safe_room",
+      "path": "audio/ambience_safe_room.wav",
+      "size": 882044,
+      "generator": "tools/gen_audio.py",
+      "license": "CC0"
+    },
+    {
+      "name": "stinger_scare",
+      "path": "audio/stinger_scare.wav",
+      "size": 176444,
+      "generator": "tools/gen_audio.py",
+      "license": "CC0"
+    },
+    {
+      "name": "stinger_transition",
+      "path": "audio/stinger_transition.wav",
+      "size": 264644,
+      "generator": "tools/gen_audio.py",
+      "license": "CC0"
+    },
+    {
+      "name": "stinger_heartbeat",
+      "path": "audio/stinger_heartbeat.wav",
+      "size": 88244,
+      "generator": "tools/gen_audio.py",
+      "license": "CC0"
+    }
+  ],
+  "models": "procedural"
+}
