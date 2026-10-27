@@ -721,6 +721,45 @@ export class MenuSystem {
 
   // Handle puzzle input submission
   handlePuzzleSubmit() {
+    if (!this.game || !this.game.activePuzzle) return;
+    
+    let input = null;
+    const puzzle = this.game.activePuzzle.puzzle;
+    
+    if (puzzle.type === 'CODE_LOCK') {
+      const inputEl = document.getElementById('puzzle-code-input');
+      if (inputEl) input = inputEl.value.split('').map(c => parseInt(c, 10));
+    } else if (puzzle.type === 'ITEM_SLOT') {
+      const selectEl = document.getElementById('puzzle-item-select');
+      if (selectEl) input = selectEl.value;
+    } else if (puzzle.type === 'RADIO_TUNING') {
+      const inputEl = document.getElementById('puzzle-frequency-input');
+      if (inputEl) input = parseFloat(inputEl.value);
+    } else {
+      const hiddenEl = document.getElementById('puzzle-hidden-input');
+      if (hiddenEl) input = hiddenEl.value;
+      if (puzzle.type === 'SEQUENCE' && input !== null) {
+        input = parseInt(input, 10);
+      }
+    }
+    
+    if (input !== null && this.game.solveActivePuzzle(input)) {
+      const feedbackEl = document.getElementById('puzzle-feedback');
+      if (feedbackEl) {
+        feedbackEl.textContent = 'Puzzle solved!';
+        feedbackEl.style.color = '#00ff00';
+      }
+      setTimeout(() => {
+        this.hide('puzzle');
+      }, 1000);
+    } else if (input !== null) {
+      const feedbackEl = document.getElementById('puzzle-feedback');
+      if (feedbackEl) {
+        feedbackEl.textContent = 'Incorrect. Try again.';
+        feedbackEl.style.color = '#ff4444';
+      }
+    }
+  }
 
   updateMap() {
     // Would render map to canvas
@@ -750,7 +789,7 @@ export class MenuSystem {
       row.className = 'binding-row';
       row.innerHTML = `
         <span>${action}</span>
-        <button data-rebind="${action}">${binding.key || `Btn${binding.gamepadButton}`}</button>
+        <button data-rebind="${action}">${binding.key || 'Btn' + binding.gamepadButton}</button>
       `;
       list.appendChild(row);
     }
