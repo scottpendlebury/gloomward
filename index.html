@@ -36,14 +36,22 @@
 
     const game = new Game(canvas);
 
-    try {
-      await game.init();
-      loading.remove();
-      console.log('Gloomward ready');
-    } catch (e) {
-      loading.textContent = 'Failed to load: ' + e.message;
-      console.error(e);
+    // Click to begin - required for AudioContext
+    function startGame() {
+      document.removeEventListener('click', startGame);
+      document.removeEventListener('keydown', startGame);
+      loading.textContent = 'Initializing…';
+      game.init().then(() => {
+        loading.remove();
+        console.log('Gloomward ready');
+      }).catch(e => {
+        loading.textContent = 'Failed to load: ' + e.message;
+        console.error(e);
+      });
     }
+
+    document.addEventListener('click', startGame, { once: true });
+    document.addEventListener('keydown', startGame, { once: true });
 
     // Expose for debugging
     window.game = game;

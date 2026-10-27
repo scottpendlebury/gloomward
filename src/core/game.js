@@ -79,6 +79,9 @@ export class Game {
     this.lastTime = 0;
     this.frameCount = 0;
 
+    // Audio
+    this.audioInitialized = false;
+
     // Debug
     this.debug = false;
     this.debugInfo = {};
@@ -116,16 +119,6 @@ export class Game {
     // Initialize player renderer
     this.playerRenderer = new PlayerRenderer(this.sceneManager.scene);
 
-    // Initialize audio
-    this.audioEngine = new AudioEngine();
-    await this.audioEngine.init();
-
-    this.ambienceSystem = new AmbienceSystem(this.audioEngine);
-    this.musicSystem = new MusicSystem(this.audioEngine);
-    this.sfxSystem = new SFXSystem(this.audioEngine);
-    this.radioSystem = new RadioSystem(this.audioEngine, this.sfxSystem);
-    this.radioSystem.init();
-
     // Initialize input
     this.inputManager = new InputManager();
 
@@ -156,7 +149,24 @@ export class Game {
     this.showTitleScreen();
 
     this.state = 'title';
-    console.log('Gloomward initialized');
+    console.log('Gloomward initialized (waiting for user interaction to start audio)');
+  }
+
+  async initAudio() {
+    if (this.audioInitialized) return;
+    
+    // Initialize audio
+    this.audioEngine = new AudioEngine();
+    await this.audioEngine.init();
+
+    this.ambienceSystem = new AmbienceSystem(this.audioEngine);
+    this.musicSystem = new MusicSystem(this.audioEngine);
+    this.sfxSystem = new SFXSystem(this.audioEngine);
+    this.radioSystem = new RadioSystem(this.audioEngine, this.sfxSystem);
+    this.radioSystem.init();
+
+    this.audioInitialized = true;
+    console.log('Audio initialized');
   }
 
   setupEventListeners() {
