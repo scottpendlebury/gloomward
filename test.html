@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gloomward - Test</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0c; font-family: system-ui, sans-serif; }
+    canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+    #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #888; font: 14px system-ui, sans-serif; text-align: center; pointer-events: none; z-index: 1000; }
+    #version { position: fixed; bottom: 8px; right: 8px; color: #444; font: 10px monospace; pointer-events: none; z-index: 100; }
+  </style>
+</head>
+<body>
+  <div id="loading">Testing module loading...</div>
+  <div id="version">v0.1.0</div>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three/three.module.js",
+      "three/core": "./vendor/three/three.core.js"
+    }
+  }
+  </script>
+  <script type="module">
+    console.log('Test module starting...');
+    
+    try {
+      // Test 1: Three.js
+      const THREE = await import('three');
+      console.log('Three.js loaded:', !!THREE.WebGLRenderer);
+      document.getElementById('loading').textContent = 'Three.js OK, testing game module...';
+      
+      // Test 2: Game module
+      const { Game } = await import('./src/core/game.js');
+      console.log('Game module loaded');
+      document.getElementById('loading').textContent = 'Game module OK, creating canvas...';
+      
+      const canvas = document.createElement('canvas');
+      document.body.appendChild(canvas);
+      
+      const game = new Game(canvas);
+      console.log('Game instance created');
+      document.getElementById('loading').textContent = 'Game created, click to init...';
+      
+      function startGame() {
+        document.removeEventListener('click', startGame);
+        document.removeEventListener('keydown', startGame);
+        document.getElementById('loading').textContent = 'Initializing…';
+        game.init().then(() => {
+          document.getElementById('loading').remove();
+          console.log('Gloomward ready');
+        }).catch(e => {
+          console.error('Game init failed:', e);
+          document.getElementById('loading').textContent = 'Failed: ' + e.message;
+        });
+      }
+
+      document.addEventListener('click', startGame, { once: true });
+      document.addEventListener('keydown', startGame, { once: true });
+      document.getElementById('loading').textContent = 'Click or press key to start...';
+      
+      window.game = game;
+      console.log('Ready - click to start');
+    } catch (e) {
+      console.error('Error:', e);
+      document.getElementById('loading').textContent = 'Error: ' + e.message;
+    }
+  </script>
+</body>
+</html>
