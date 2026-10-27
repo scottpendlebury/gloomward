@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gloomward</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0c; }
+    canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+    #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #888; font: 14px system-ui, sans-serif; text-align: center; pointer-events: none; }
+    #version { position: fixed; bottom: 8px; right: 8px; color: #444; font: 10px monospace; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div id="loading">Loading Gloomward…</div>
+  <div id="version">v0.0.1</div>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three/three.module.js",
+      "three/core": "./vendor/three/three.core.js"
+    }
+  }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+
+    const loading = document.getElementById('loading');
+
+    const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(1);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const fogColor = 0x1a1a2e;
+    scene.fog = new THREE.FogExp2(fogColor, 0.015);
+    renderer.setClearColor(fogColor);
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 500);
+    camera.position.set(0, 1.6, 5);
+
+    // Ground
+    const groundGeo = new THREE.PlaneGeometry(200, 200, 50, 50);
+    const groundMat = new THREE.MeshBasicMaterial({ color: 0x11111a, wireframe: true, transparent: true, opacity: 0.3 });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    scene.add(ground);
+
+    // Spinning cube
+    const cubeGeo = new THREE.BoxGeometry(1, 1, 1);
+    const cubeMat = new THREE.MeshStandardMaterial({ color: 0x8b0000, roughness: 0.7, metalness: 0.1 });
+    const cube = new THREE.Mesh(cubeGeo, cubeMat);
+    cube.position.set(0, 1, 0);
+    scene.add(cube);
+
+    // Torch light (spotlight)
+    const torch = new THREE.SpotLight(0xffeecc, 40, 20, Math.PI / 4, 0.5, 1);
+    torch.position.set(0, 1.6, 5);
+    torch.target.position.set(0, 0, 0);
+    torch.castShadow = true;
+    torch.shadow.mapSize.set(512, 512);
+    scene.add(torch);
+    scene.add(torch.target);
+
+    // Ambient
+    scene.add(new THREE.HemisphereLight(0x222233, 0x111111, 0.6));
+
+    // Fog particles
+    const particleGeo = new THREE.BufferGeometry();
+    const particleCount = 500;
+    const positions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 80;
+      positions[i * 3 + 1] = Math.random() * 10;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 80;
+    }
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particleMat = new THREE.PointsMaterial({ color: 0x444455, size: 0.15, transparent: true, opacity: 0.6, depthWrite: false });
+    const particles = new THREE.Points(particleGeo, particleMat);
+    scene.add(particles);
+
+    loading.remove();
+
+    let time = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      time += 1 / 60;
+
+      cube.rotation.x += 0.005;
+      cube.rotation.y += 0.01;
+
+      torch.position.x = Math.sin(time * 0.3) * 3;
+      torch.position.z = 5 + Math.cos(time * 0.3) * 3;
+      torch.target.position.x = torch.position.x;
+      torch.target.position.z = torch.position.z - 5;
+
+      particles.rotation.y += 0.0002;
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
