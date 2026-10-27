@@ -39,13 +39,15 @@
 - [x] URL parameter handling: ?viewer=1, ?debug=1, ?selftest=1
 - [x] Assets deployed and verified on GitHub Pages
 - [x] Unit tests passing: RNG, Grid, Floor generation (34 tests)
+- [x] Type-specific enemy AI behaviors (crawler flanking, watchman light avoidance, siren ranged combat, amalgam charge, stalker pursuit)
+- [x] Puzzle UI integration with dynamic input handling for all puzzle types
+- [x] Puzzle menu with clue display and interactive inputs
 
 ### In Progress
-- [ ] Complete enemy AI behaviors (all 8 types)
-- [ ] Puzzle system integration with UI
 - [ ] Relic system implementation
 - [ ] Hub meta-progression UI
 - [ ] Ending system logic
+- [ ] Asset viewer integration with live data
 - [ ] Polish and optimization
 
 ### Known Issues
@@ -53,11 +55,10 @@
 - Three.js modern build splits into multiple files; using `three.module.js` + `three.core.js` for now.
 
 ### Next Steps
-1. Implement remaining enemy AI behaviors
-2. Integrate puzzle system with UI
-3. Build hub and meta-progression
-4. Add ending logic
-5. Polish and optimization
+1. Build hub meta-progression UI with currency, loadouts, relics, archive
+2. Implement ending system logic with multiple endings
+3. Complete asset viewer with live data
+4. Polish and optimization
 
 ---
 
@@ -66,7 +67,7 @@
 | Milestone | Status | Target | Live Verified |
 |-----------|--------|--------|---------------|
 | M0 Pipeline | ✅ Done | 2026-10-27 | ✅ https://scottpendlebury.github.io/gloomward/ |
-| M1 Vertical Slice | 🟡 Core systems + assets + viewer + tests done | — | — |
+| M1 Vertical Slice | 🟡 Core systems + assets + viewer + tests + AI + puzzles done | — | — |
 | M2 Core Loop | ⬜ Pending | — | — |
 | M3 Roguelike Depth | ⬜ Pending | — | — |
 | M4 Polish & Content | ⬜ Pending | — | — |
@@ -83,3 +84,4 @@
 | 2026-10-27 | ~21 MB | 1.6 GB | M1 assets (39 textures, 10 audio files) |
 | 2026-10-27 | ~22 MB | 1.6 GB | M1 viewer + URL params |
 | 2026-10-27 | ~27 MB | 1.6 GB | M1 tests passing (34 tests) |
+| 2026-10-27 | ~27 MB | 1.6 GB | M1 AI behaviors + puzzle UI |
