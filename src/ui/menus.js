@@ -203,6 +203,23 @@ export class MenuSystem {
     this.elements.set('notes', container);
   }
 
+  createPuzzleMenu() {
+    const container = this.createElement('div', 'menu puzzle-menu hidden', `
+      <div class="menu-overlay"></div>
+      <div class="menu-content puzzle-content">
+        <h2>PUZZLE</h2>
+        <div id="puzzle-clue" class="puzzle-clue"></div>
+        <div id="puzzle-input" class="puzzle-input"></div>
+        <div id="puzzle-feedback" class="puzzle-feedback"></div>
+        <div class="menu-hints">
+          <span>[Enter] Submit</span>
+          <span>[Esc] Cancel</span>
+        </div>
+      </div>
+    `);
+    this.elements.set('puzzle', container);
+  }
+
   createOptionsMenu() {
     const container = this.createElement('div', 'menu options-menu hidden', `
       <div class="menu-overlay"></div>
@@ -594,9 +611,116 @@ export class MenuSystem {
     }
   }
 
-  updateInventory() {
-    // Would populate from game state
+  updateContinueInfo() {
+    const hasSave = this.game?.saveSystem?.hasSave?.();
+    document.getElementById('save-info').textContent = hasSave ? 'Save found' : 'No save found';
   }
+
+  updatePuzzleUI(puzzle) {
+    const clueEl = document.getElementById('puzzle-clue');
+    const inputEl = document.getElementById('puzzle-input');
+    const feedbackEl = document.getElementById('puzzle-feedback');
+    
+    if (clueEl) {
+      clueEl.textContent = puzzle.clueText || 'No clue available';
+    }
+    
+    if (inputEl) {
+      inputEl.innerHTML = '';
+      
+      if (puzzle.type === 'CODE_LOCK') {
+        // Number input for code lock
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = 'puzzle-code-input';
+        input.placeholder = 'Enter code (e.g. 1234)';
+        input.maxLength = 4;
+        input.pattern = '\\d*';
+        inputEl.appendChild(input);
+      } else if (puzzle.type === 'ITEM_SLOT') {
+        // Item selection
+        const select = document.createElement('select');
+        select.id = 'puzzle-item-select';
+        select.innerHTML = '<option value="">Select item...</option>';
+        // Would populate with player's inventory items
+        inputEl.appendChild(select);
+      } else if (puzzle.type === 'RADIO_TUNING') {
+        // Frequency input
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.id = 'puzzle-frequency-input';
+        input.step = '0.1';
+        input.min = '88.0';
+        input.max = '108.0';
+        input.placeholder = 'Frequency (MHz)';
+        inputEl.appendChild(input);
+      } else if (puzzle.type === 'RIDDLE_LOOKUP') {
+        // Option buttons
+        const options = puzzle.options || [];
+        options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = opt;
+          btn.onclick = () => {
+            const inputEl = document.getElementById('puzzle-hidden-input');
+            if (inputEl) inputEl.value = opt;
+          };
+          inputEl.appendChild(btn);
+        });
+        // Hidden input for form submission
+        const hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.id = 'puzzle-hidden-input';
+        hidden.name = 'puzzle-answer';
+        inputEl.appendChild(hidden);
+      } else if (puzzle.type === 'SEQUENCE') {
+        // Sequence buttons
+        const steps = ['Turn Left', 'Turn Right', 'Pull Down', 'Push Up'];
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.flexWrap = 'wrap';
+        container.style.gap = '8px';
+        steps.forEach((step, i) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = step;
+          btn.onclick = () => {
+            const inputEl = document.getElementById('puzzle-hidden-input');
+            if (inputEl) inputEl.value = i;
+          };
+          container.appendChild(btn);
+        });
+        inputEl.appendChild(container);
+        const hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.id = 'puzzle-hidden-input';
+        hidden.name = 'puzzle-answer';
+        inputEl.appendChild(hidden);
+      } else if (puzzle.type === 'SHADOW_REVEAL') {
+        // Simple button
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = 'Use Torch / Turn Around';
+        btn.onclick = () => {
+          const inputEl = document.getElementById('puzzle-hidden-input');
+          if (inputEl) inputEl.value = 'torch_on';
+        };
+        inputEl.appendChild(btn);
+        const hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.id = 'puzzle-hidden-input';
+        hidden.name = 'puzzle-answer';
+        inputEl.appendChild(hidden);
+      }
+    }
+    
+    // Clear feedback
+    const feedbackEl = document.getElementById('puzzle-feedback');
+    if (feedbackEl) feedbackEl.textContent = '';
+  }
+
+  // Handle puzzle input submission
+  handlePuzzleSubmit() {
 
   updateMap() {
     // Would render map to canvas

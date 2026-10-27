@@ -7,6 +7,7 @@ import { SceneManager } from '../render/scene.js';
 import { CameraController, CinematicShots } from '../render/camera.js';
 import { PlayerRenderer } from '../render/player.js';
 import { AssetViewer } from '../render/viewer.js';
+import * as THREE from 'three';
 import { AudioEngine } from '../audio/context.js';
 import { AmbienceSystem } from '../audio/ambience.js';
 import { MusicSystem, MusicState } from '../audio/music.js';
@@ -909,13 +910,59 @@ export class Game {
   tryPuzzleAtDoor(x, z) {
     // Find puzzle for this door
     for (const lock of this.floorData.locks) {
-      // Would need door position mapping
+      // Would need door position mapping - simplified for now
       if (lock.puzzle) {
         // Show puzzle UI
-        console.log('Puzzle:', lock.puzzle.clueText);
+        this.showPuzzleUI(lock.puzzle, lock.doorId);
+        return;
       }
     }
   }
+
+  showPuzzleUI(puzzle, doorId) {
+    // Set active puzzle for UI
+    this.activePuzzle = { puzzle, doorId };
+    this.menuSystem.show('puzzle');
+    this.menuSystem.updatePuzzleUI(puzzle);
+  }
+
+  solveActivePuzzle(input) {
+    if (!this.activePuzzle) return false;
+    
+    const solved = this.puzzleSystem.attemptSolve(this.activePuzzle.doorId, input);
+    if (solved) {
+      // Unlock the door
+      for (const lock of this.floorData.locks) {
+        if (lock.doorId === this.activePuzzle.doorId) {
+          // Find door position and unlock
+          this.unlockDoorForPuzzle(lock);
+          break;
+        }
+      }
+      this.activePuzzle = null;
+      this.menuSystem.hide('puzzle');
+      this.sfxSystem.playUISound('menu_select');
+      return true;
+    }
+    return false;
+  }
+
+  unlockDoorForPuzzle(lock) {
+    // Find door position in grid (simplified)
+    for (let x = 0; x < this.grid.width; x++) {
+      for (let z = 0; z < this.grid.height; z++) {
+        const cell = this.grid.getCell(x, z);
+        if (cell === GridWorld.prototype.CellType.DOOR_LOCKED || cell === GridWorld.prototype.CellType.DOOR_CLOSED) {
+          const door = this.grid.getDoor(x, z);
+          if (door && door.keyId === lock.keyId) {
+            this.grid.unlockDoor(x, z);
+            this.grid.openDoor(x, z);
+            this.sfxSystem.playDoorSound('open', { x: x * this.grid.cellSize, y: 0, z: z * this.grid.cellSize });
+            return;
+          }
+        }
+      }
+    }
 
   pickupItem(entity) {
     const pickup = entity.components.Pickup;
@@ -1095,21 +1142,44 @@ export class Game {
           ai.state = AIState.CHASE;
         } else if (ai.timer <= 0) {
           ai.state = AIState.WANDER;
+        } else {
+          // Move toward last known player position or investigate noise source
+          if (ai.target && ai.target.components.Transform) {
+            const tx = ai.target.components.Transform.x - transform.x;
+            const tz = ai.target.components.Transform.z - transform.z;
+            const td = Math.hypot(tx, tz);
+            if (td > 1) {
+              const speed = (params.speedMult || 1) * 1.5;
+              velocity.vx = (tx / td) * speed;
+              velocity.vz = (tz / td) * speed;
+            }
+          }
         }
         break;
 
       case AIState.CHASE:
-        if (dist > params.sightRange * 1.5) {
-          ai.state = AIState.INVESTIGATE;
-          ai.timer = 5;
-        } else if (dist < 2) {
-          ai.state = AIState.ATTACK;
-          ai.timer = params.attackCooldown;
+        // Type-specific chase behavior
+        if (entity.type === 'crawler') {
+          // Crawlers stay low and try to flank
+          this.chaseCrawler(entity, dt, dx, dz, dist, params);
+        } else if (entity.type === 'watchman') {
+          // Watchmen avoid light
+          this.chaseWatchman(entity, dt, dx, dz, dist, params);
+        } else if (entity.type === 'siren') {
+          // Sirens keep distance and shoot
+          this.chaseSiren(entity, dt, dx, dz, dist, params);
+        } else if (entity.type === 'mimic') {
+          // Mimics stay still until interacted
+          // Handled in interact
+        } else if (entity.type === 'amalgam') {
+          // Amalgams charge aggressively
+          this.chaseAmalgam(entity, dt, dx, dz, dist, params);
+        } else if (entity.type === 'stalker') {
+          // Stalker relentlessly pursues
+          this.chaseStalker(entity, dt, dx, dz, dist, params);
         } else {
-          // Move toward player
-          const speed = (params.speedMult || 1) * 2;
-          velocity.vx = (dx / dist) * speed;
-          velocity.vz = (dz / dist) * speed;
+          // Default chase (shambler)
+          this.chaseDefault(entity, dt, dx, dz, dist, params);
         }
         break;
 
@@ -1194,6 +1264,184 @@ export class Game {
       }
     }
     return count;
+  }
+
+  // Type-specific chase behaviors
+  chaseDefault(entity, dt, dx, dz, dist, params) {
+    if (dist > params.sightRange * 1.5) {
+      entity.components.AI.state = AIState.INVESTIGATE;
+      entity.components.AI.timer = 5;
+    } else if (dist < 2) {
+      entity.components.AI.state = AIState.ATTACK;
+      entity.components.AI.timer = params.attackCooldown;
+    } else {
+      const speed = (params.speedMult || 1) * 2;
+      entity.components.Velocity.vx = (dx / dist) * speed;
+      entity.components.Velocity.vz = (dz / dist) * speed;
+    }
+  }
+
+  chaseCrawler(entity, dt, dx, dz, dist, params) {
+    const velocity = entity.components.Velocity;
+    const transform = entity.components.Transform;
+    const playerPos = this.player.components.Transform;
+
+    if (dist > params.sightRange * 1.5) {
+      entity.components.AI.state = AIState.INVESTIGATE;
+      entity.components.AI.timer = 5;
+    } else if (dist < 1.5) {
+      entity.components.AI.state = AIState.ATTACK;
+      entity.components.AI.timer = params.attackCooldown;
+    } else {
+      // Crawlers try to flank - move perpendicular to player facing
+      const playerFacing = this.player.components.Transform.rot;
+      const toPlayer = Math.atan2(dx, dz);
+      const angleDiff = toPlayer - playerFacing;
+      
+      // Try to circle around to player's back/side
+      const flankAngle = toPlayer + (Math.abs(angleDiff) < Math.PI / 2 ? Math.PI / 2 : -Math.PI / 2);
+      const flankX = Math.sin(flankAngle);
+      const flankZ = Math.cos(flankAngle);
+      
+      // Check if flank position is valid
+      const flankDist = 3;
+      const targetX = this.player.components.Transform.x + flankX * flankDist;
+      const targetZ = this.player.components.Transform.z + flankZ * flankDist;
+      const gx = Math.floor(targetX / this.grid.cellSize);
+      const gz = Math.floor(targetZ / this.grid.cellSize);
+      
+      if (this.grid.isWalkable(gx, gz)) {
+        const tx = targetX - entity.components.Transform.x;
+        const tz = targetZ - entity.components.Transform.z;
+        const td = Math.hypot(tx, tz);
+        if (td > 1) {
+          const speed = (params.speedMult || 1) * 2.5;
+          entity.components.Velocity.vx = (tx / td) * speed;
+          entity.components.Velocity.vz = (tz / td) * speed;
+        } else {
+          // Fallback to direct chase
+          const speed = (params.speedMult || 1) * 2;
+          entity.components.Velocity.vx = (dx / dist) * speed;
+          entity.components.Velocity.vz = (dz / dist) * speed;
+        }
+      } else {
+        // Direct chase if flank blocked
+        const speed = (params.speedMult || 1) * 2;
+        entity.components.Velocity.vx = (dx / dist) * speed;
+        entity.components.Velocity.vz = (dz / dist) * speed;
+      }
+    }
+  }
+
+  chaseWatchman(entity, dt, dx, dz, dist, params) {
+    const velocity = entity.components.Velocity;
+    const transform = entity.components.Transform;
+    const torch = this.player.components.Torch;
+
+    // Watchmen avoid light - check if player's torch is on and shining on them
+    let inLight = false;
+    if (torch && torch.on) {
+      const torchDir = new THREE.Vector2(Math.sin(this.cameraController.yaw), Math.cos(this.cameraController.yaw));
+      const toEnemy = new THREE.Vector2(dx, dz).normalize();
+      const dot = torchDir.dot(toEnemy);
+      if (dot > Math.cos(Math.PI / 4) && dist < 10) {
+        inLight = true;
+      }
+    }
+
+    if (inLight && dist < 8) {
+      // Flee from light
+      entity.components.AI.state = AIState.FLEE;
+      entity.components.AI.timer = 2;
+      const speed = (params.speedMult || 1) * 2.5;
+      velocity.vx = (-dx / dist) * speed;
+      velocity.vz = (-dz / dist) * speed;
+    } else if (dist > params.sightRange * 1.5) {
+      entity.components.AI.state = AIState.INVESTIGATE;
+      entity.components.AI.timer = 5;
+    } else if (dist < 2) {
+      entity.components.AI.state = AIState.ATTACK;
+      entity.components.AI.timer = params.attackCooldown;
+    } else {
+      // Normal chase but slower in light
+      const speed = (params.speedMult || 1) * (inLight ? 1.5 : 2);
+      velocity.vx = (dx / dist) * speed;
+      velocity.vz = (dz / dist) * speed;
+    }
+  }
+
+  chaseSiren(entity, dt, dx, dz, dist, params) {
+    const velocity = entity.components.Velocity;
+    const ranged = entity.components.RangedWeapon;
+
+    // Sirens prefer to keep distance and shoot
+    const preferredDist = 8;
+
+    if (dist > params.sightRange * 1.5) {
+      entity.components.AI.state = AIState.INVESTIGATE;
+      entity.components.AI.timer = 5;
+    } else if (dist < 3) {
+      // Too close - back away
+      const speed = (params.speedMult || 1) * 2;
+      velocity.vx = (-dx / dist) * speed;
+      velocity.vz = (-dz / dist) * speed;
+    } else if (dist > preferredDist) {
+      // Move closer to preferred range
+      const speed = (params.speedMult || 1) * 1.5;
+      velocity.vx = (dx / dist) * speed;
+      velocity.vz = (dz / dist) * speed;
+    } else if (dist < preferredDist * 0.8) {
+      // Too close - back up slightly
+      const speed = (params.speedMult || 1) * 1;
+      velocity.vx = (-dx / dist) * speed;
+      velocity.vz = (-dz / dist) * speed;
+    } else {
+      // At preferred range - strafe and shoot
+      if (ranged && ranged.ammo > 0 && ranged.cooldown <= 0) {
+        const result = this.combatSystem.attemptRangedAttack(entity, this.player, this.grid);
+        if (result.hit) {
+          this.sfxSystem.playEnemySound('attack', entity.components.Transform, entity.type);
+        }
+        ranged.cooldown = 3.0;
+      }
+      // Strafe perpendicular to player
+      const strafeAngle = Math.atan2(dx, dz) + Math.PI / 2;
+      const speed = (params.speedMult || 1) * 1;
+      velocity.vx = Math.sin(strafeAngle) * speed;
+      velocity.vz = Math.cos(strafeAngle) * speed;
+    }
+  }
+
+  chaseAmalgam(entity, dt, dx, dz, dist, params) {
+    const velocity = entity.components.Velocity;
+
+    if (dist > params.sightRange * 2) { // Amalgams have longer sight
+      entity.components.AI.state = AIState.INVESTIGATE;
+      entity.components.AI.timer = 5;
+    } else if (dist < 2.5) {
+      entity.components.AI.state = AIState.ATTACK;
+      entity.components.AI.timer = params.attackCooldown;
+    } else {
+      // Amalgams charge aggressively, ignoring obstacles somewhat
+      const speed = (params.speedMult || 1) * 2.5;
+      velocity.vx = (dx / dist) * speed;
+      velocity.vz = (dz / dist) * speed;
+    }
+  }
+
+  chaseStalker(entity, dt, dx, dz, dist, params) {
+    const velocity = entity.components.Velocity;
+
+    // Stalker relentlessly pursues, can break doors
+    if (dist < 3) {
+      entity.components.AI.state = AIState.ATTACK;
+      entity.components.AI.timer = params.attackCooldown;
+    } else {
+      // Stalker moves fast and can pathfind through doors
+      const speed = (params.speedMult || 1) * 3;
+      velocity.vx = (dx / dist) * speed;
+      velocity.vz = (dz / dist) * speed;
+    }
   }
 
   useQuickHeal() {
