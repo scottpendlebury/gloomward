@@ -136,6 +136,7 @@ export class GridWorld {
     const cameFrom = new Map();
     const gScore = new Map();
     const fScore = new Map();
+    const closed = new Set();
 
     const startKey = `${sx},${sy}`;
     const goalKey = `${gx},${gy}`;
@@ -153,12 +154,16 @@ export class GridWorld {
         return this.reconstructPath(cameFrom, currentKey);
       }
 
+      if (closed.has(currentKey)) continue;
+      closed.add(currentKey);
+
       for (let dir = 0; dir < 8; dir++) {
         const nx = current.x + Direction.dx[dir];
         const ny = current.y + Direction.dy[dir];
         const neighborKey = `${nx},${ny}`;
 
         if (!this.isWalkable(nx, ny)) continue;
+        if (closed.has(neighborKey)) continue;
 
         const moveCost = (dir % 2 === 0) ? 1 : 1.414; // cardinal vs diagonal
         const tentativeG = gScore.get(currentKey) + moveCost;
@@ -183,9 +188,15 @@ export class GridWorld {
 
   reconstructPath(cameFrom, currentKey) {
     const path = [currentKey];
-    while (cameFrom.has(currentKey)) {
+    let iterations = 0;
+    const maxIterations = 10000;
+    while (cameFrom.has(currentKey) && iterations < maxIterations) {
       currentKey = cameFrom.get(currentKey);
       path.push(currentKey);
+      iterations++;
+    }
+    if (iterations >= maxIterations) {
+      console.warn('reconstructPath: max iterations reached, possible cycle in cameFrom');
     }
     return path.reverse().map(k => {
       const [x, y] = k.split(',').map(Number);

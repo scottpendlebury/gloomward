@@ -1,8 +1,8 @@
 # Gloomward — Progress Log
 
 **Started:** 2026-10-27
-**Current Milestone:** M0 — Pipeline
-**Git Branch:** main (will switch to dev after M0)
+**Current Milestone:** M1 — Vertical Slice
+**Git Branch:** dev
 
 ---
 
@@ -35,15 +35,17 @@
 - [x] M1 Vertical Slice core systems complete
 - [x] Texture generation: 39 seamless 256px PNGs (tiles, props, decals, sprites, nightmare variants)
 - [x] Audio generation: 7 ambience loops (10s each) + 3 stingers (WAV, 44.1kHz)
+- [x] Asset viewer (`?viewer=1`) with texture, prop, enemy, sprite browsing
+- [x] URL parameter handling: ?viewer=1, ?debug=1, ?selftest=1
+- [x] Assets deployed and verified on GitHub Pages
+- [x] Unit tests passing: RNG, Grid, Floor generation (34 tests)
 
 ### In Progress
-- [ ] Asset viewer (`?viewer=1`)
-- [ ] Complete enemy AI behaviors
+- [ ] Complete enemy AI behaviors (all 8 types)
 - [ ] Puzzle system integration with UI
 - [ ] Relic system implementation
 - [ ] Hub meta-progression UI
 - [ ] Ending system logic
-- [ ] Tests (Node + browser)
 - [ ] Polish and optimization
 
 ### Known Issues
@@ -51,12 +53,11 @@
 - Three.js modern build splits into multiple files; using `three.module.js` + `three.core.js` for now.
 
 ### Next Steps
-1. Build asset viewer (`?viewer=1`)
-2. Implement remaining enemy types and AI
-3. Integrate puzzle system with UI
-4. Build hub and meta-progression
-5. Add ending logic
-6. Write tests
+1. Implement remaining enemy AI behaviors
+2. Integrate puzzle system with UI
+3. Build hub and meta-progression
+4. Add ending logic
+5. Polish and optimization
 
 ---
 
@@ -65,7 +66,7 @@
 | Milestone | Status | Target | Live Verified |
 |-----------|--------|--------|---------------|
 | M0 Pipeline | ✅ Done | 2026-10-27 | ✅ https://scottpendlebury.github.io/gloomward/ |
-| M1 Vertical Slice | 🟡 Core systems + assets done | — | — |
+| M1 Vertical Slice | 🟡 Core systems + assets + viewer + tests done | — | — |
 | M2 Core Loop | ⬜ Pending | — | — |
 | M3 Roguelike Depth | ⬜ Pending | — | — |
 | M4 Polish & Content | ⬜ Pending | — | — |
@@ -80,3 +81,5 @@
 | 2026-10-27 | ~8 MB | 1.6 GB | M0 complete (vendored Three.js, docs) |
 | 2026-10-27 | ~14 MB | 1.6 GB | M1 core systems (sim, gen, render, audio, ui, core) |
 | 2026-10-27 | ~21 MB | 1.6 GB | M1 assets (39 textures, 10 audio files) |
+| 2026-10-27 | ~22 MB | 1.6 GB | M1 viewer + URL params |
+| 2026-10-27 | ~27 MB | 1.6 GB | M1 tests passing (34 tests) |

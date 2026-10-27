@@ -203,7 +203,7 @@ function buildRoomGraph(rng, floorIndex, theme) {
 
     // 30% chance for loop (connect to another main path room)
     if (rng.next() < 0.3 && roomCount > 2) {
-      const loopTo = rng.nextInt(roomCount - 1);
+      let loopTo = rng.nextInt(roomCount - 1);
       if (loopTo >= attachTo) loopTo++;
       edges.push({
         from: branchId,
@@ -416,7 +416,9 @@ function placeRoomAdjacent(grid, rng, neighbor, edge, roomId, size, type) {
     let overlap = false;
     for (let y = newY - 1; y <= newY + size.h; y++) {
       for (let x = newX - 1; x <= newX + size.w; x++) {
-        if (grid.getCell(x, y) !== GridWorld.prototype.getCell.call({ cells: grid.cells, width: grid.width }, x, y)) {
+        // Check if cell is already floor (not empty)
+        const idx = y * grid.width + x;
+        if (idx >= 0 && idx < grid.cells.length && grid.cells[idx] !== CellType.EMPTY) {
           // Check if already floor
           if (grid.isWalkable(x, y)) { overlap = true; break; }
         }
@@ -596,9 +598,9 @@ export function validateFloor(floor) {
   const startY = Math.round(floor.start.y);
 
   // BFS from start with key collection simulation
-  const visited = new Set();
+  const visited = new Map(); // key -> Set of key IDs
   const queue = [{ x: startX, y: startY, keys: new Set() }];
-  visited.add(`${startX},${startY}`);
+  visited.set(`${startX},${startY}`, new Set());
 
   const keysByRoom = new Map();
   for (const key of floor.keys) {
@@ -611,8 +613,11 @@ export function validateFloor(floor) {
     locksByDoor.set(lock.doorId, lock);
   }
 
+  // Track unique keys found
+  const allFoundKeys = new Set();
+
   let steps = 0;
-  const maxSteps = grid.width * grid.height * 2;
+  const maxSteps = grid.width * grid.height * 4;
 
   while (queue.length > 0 && steps < maxSteps) {
     const current = queue.shift();
@@ -622,8 +627,10 @@ export function validateFloor(floor) {
     const roomAtPos = floor.rooms.find(r => r.contains(current.x, current.y));
     if (roomAtPos && keysByRoom.has(roomAtPos.id)) {
       for (const key of keysByRoom.get(roomAtPos.id)) {
-        current.keys.add(key.keyId);
-        report.keysReachable++;
+        if (!current.keys.has(key.keyId)) {
+          current.keys.add(key.keyId);
+          allFoundKeys.add(key.keyId);
+        }
       }
     }
 
@@ -638,7 +645,7 @@ export function validateFloor(floor) {
       const ny = current.y + Direction.dy[dir * 2];
       const key = `${nx},${ny}`;
 
-      if (!grid.inBounds(nx, ny) || visited.has(key)) continue;
+      if (!grid.inBounds(nx, ny)) continue;
 
       const cell = grid.getCell(nx, ny);
       let canPass = false;
@@ -658,8 +665,13 @@ export function validateFloor(floor) {
       }
 
       if (canPass) {
-        visited.add(key);
-        queue.push({ x: nx, y: ny, keys: newKeys });
+        const visitedKeys = visited.get(key);
+        const hasNewKeys = [...current.keys].some(k => !visitedKeys?.has(k));
+        
+        if (!visitedKeys || hasNewKeys) {
+          visited.set(key, new Set(current.keys));
+          queue.push({ x: nx, y: ny, keys: newKeys });
+        }
       }
     }
   }
@@ -668,6 +680,8 @@ export function validateFloor(floor) {
     const centerKey = `${r.centerX},${r.centerY}`;
     return visited.has(centerKey);
   }).length;
+
+  report.keysReachable = allFoundKeys.size;
 
   // Check validation criteria
   if (!report.exitReachable) {
