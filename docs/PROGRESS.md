@@ -19,25 +19,23 @@
 - [x] `index.html` with import map, "hello fog" Three.js page (spinning cube, fog, torch spotlight, particles)
 - [x] `.nojekyll` file at root
 - [x] `docs/PLAN.md` created with full milestones, technical decisions, game design
+- [x] `docs/ARCHITECTURE.md` created with module overview, interfaces, data flow
+- [x] GitHub repo created: `scottpendlebury/gloomward` (public)
+- [x] Initial commit pushed to GitHub
+- [x] GitHub Pages enabled (branch `main`, folder `/`)
+- [x] Live URL verified: https://scottpendlebury.github.io/gloomward/ (HTTP 200)
+- [x] `.gitignore` added, `node_modules` removed from tracking
+- [x] Switched to `dev` branch for daily work
 
 ### In Progress
-- [ ] GitHub repo creation and push
-- [ ] GitHub Pages enable + verify live URL
-- [ ] `docs/PROGRESS.md` (this file)
-- [ ] `docs/ARCHITECTURE.md`
-- [ ] Initial commit and push to GitHub
+- (none — M0 complete)
 
 ### Known Issues
 - Disk space is tight (1.6 GB free). Must monitor `du -sh` and `df -h .` after each milestone.
 - Three.js modern build splits into multiple files; using `three.module.js` + `three.core.js` for now. May need additional modules from `examples/jsm/` later.
 
 ### Next Steps
-1. Create GitHub repo `gloomward` and push initial commit
-2. Enable GitHub Pages (branch `main`, folder `/`)
-3. Poll live URL until HTTP 200
-4. Create `docs/ARCHITECTURE.md`
-5. Switch to `dev` branch for daily work
-6. Begin M1 Vertical Slice
+1. Begin M1 Vertical Slice: title screen, new run, one generated interior floor
 
 ---
 
@@ -45,8 +43,8 @@
 
 | Milestone | Status | Target | Live Verified |
 |-----------|--------|--------|---------------|
-| M0 Pipeline | 🟡 In Progress | 2026-10-27 | — |
-| M1 Vertical Slice | ⬜ Pending | — | — |
+| M0 Pipeline | ✅ Done | 2026-10-27 | ✅ https://scottpendlebury.github.io/gloomward/ |
+| M1 Vertical Slice | 🟡 In Progress | — | — |
 | M2 Core Loop | ⬜ Pending | — | — |
 | M3 Roguelike Depth | ⬜ Pending | — | — |
 | M4 Polish & Content | ⬜ Pending | — | — |
@@ -58,3 +56,4 @@
 | Date | Project Size | Free Space | Notes |
 |------|--------------|------------|-------|
 | 2026-10-27 | ~5 MB | 1.6 GB | Initial setup |
+| 2026-10-27 | ~8 MB | 1.6 GB | M0 complete (vendored Three.js, docs) |
